@@ -37,9 +37,9 @@ app.use(verifyToken)
 
 // Socket.io events
 io.on("connection",(socket)=>{
-    console.log("connection established",);
+    console.log("connection established",socket.id);
 
-    socket.on("join-room", (userId) => {
+    socket.on("joinRoom", (userId) => {
         socket.join(userId);
         console.log(`User with ID: ${userId} joined room: ${userId}`);
     })
@@ -48,8 +48,11 @@ io.on("connection",(socket)=>{
 
     socket.on("message",(message)=>{
         console.log("message received",message);
-        io.to(message.receiverId).emit("message",message);
-        io.emit("message",message);
+       const {receiverId} = message
+       io.to(receiverId).emit("message",message);
+
+        // io.to(message.receiverId).emit("message",message);
+        // io.emit("message",message);
     })
     
     socket.on('disconnect',()=>{

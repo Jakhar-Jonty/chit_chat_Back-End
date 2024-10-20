@@ -12,7 +12,9 @@ const getAllChats  = async(req,res)=>{
         if (allchat.length === 0) {
             return res.status(207).json({ message: "Search your friends and get connected" });
         }
-        return res.status(200).json(allchat);
+        console.log("sdfdsf");
+        return res.status(200).json([allchat,{loginuser:user}]);
+        
    } catch (error) {
         console.log(error);
         
