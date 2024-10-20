@@ -5,8 +5,10 @@ require('dotenv').config()
 
 const loginUser = async (req, res) => {
     const { email, password } = req.body
-
+    
     if (!email || !password) {
+        console.log("Please provide email and password");
+        
         return res.status(400).json({ message: 'Please provide email and password' })
     }
     try {
@@ -18,15 +20,13 @@ const loginUser = async (req, res) => {
         if (!isMatch) {
             return res.status(401).json({ message: 'Invalid credentials' })
         }
-
-
-
         // Generate JWT token
         const token = jwt.sign(
             { userId: user._id }, 
             process.env.JWT_SECRET,
             { expiresIn: '24h' } 
         );
+        console.log("login success", token);
         
         // Send the token in the response
         res.status(200).json({ message: 'Login successful', token: token });

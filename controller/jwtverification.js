@@ -1,4 +1,5 @@
 const jwt =require('jsonwebtoken');
+const User = require('../model/userModel')
 
 // Middleware to verify JWT token
 const verifyToken = async (req, res, next) => {
@@ -9,15 +10,26 @@ const verifyToken = async (req, res, next) => {
     // console.log(req.headers);
     
     const token = req.headers['authorization']
-     console.log("this is token",token);
+     console.log("token",token);
      
     if (!token) return res.status(401).json({ message: 'Token not provided' });
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, async(err, user) => {
         if (err) {
+            console.log("invalid token: ");
             
-            return res.status(403).json({ message: 'Invalid token' });}
-        req.user = user;
+            return res.status(403).json({ message: 'Invalid token' });
+        }
+        
+       if (user) {
+        const isUser = await User.findOne({_id:user.userId}).select('-password -chatsWith');
+        // console.log(isUser);
+
+        req.user = isUser
+       }
+        
+        // if (isUser===null) return res.status(403).json({ message: 'User not found' });
         console.log("Token verified");
+        
         next();
     });
 };

@@ -13,6 +13,8 @@ const loginUser = require('./controller/loginUserController')
 const searchUser = require('./controller/searchUserController')
 const verifyToken  = require('./controller/jwtverification')
 const chatWithUser = require('./controller/chatController')
+const getAllChats = require('./controller/getAllChatsController')
+const messageStore = require('./controller/messageController')
 const server = http.createServer(app)
 
 const io = new Server(server, {
@@ -37,12 +39,18 @@ app.use(verifyToken)
 io.on("connection",(socket)=>{
     console.log("connection established",);
 
-    socket.on("message",(msg)=>{
-        console.log("message received",msg);
-        io.emit("message",msg);
+    socket.on("join-room", (userId) => {
+        socket.join(userId);
+        console.log(`User with ID: ${userId} joined room: ${userId}`);
     })
-    
-    
+
+
+
+    socket.on("message",(message)=>{
+        console.log("message received",message);
+        io.to(message.receiverId).emit("message",message);
+        io.emit("message",message);
+    })
     
     socket.on('disconnect',()=>{
         console.log("client disconnected");
@@ -53,10 +61,12 @@ io.on("connection",(socket)=>{
 
 
 // API endpoints
+
+app.get('/',getAllChats)
 app.post("/register",registerUser)
 app.post("/login",loginUser)
 app.post("/searchuser",searchUser)
-
+app.post('/chat/:user',messageStore)
 app.get('/chat/:user',chatWithUser)
 
 server.listen(PORT,()=>{
